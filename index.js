@@ -36,6 +36,10 @@ let persons = [
 
 let date = new Date()
 
+app.get('/', (req, res) => {
+    res.send('/index.html')
+  })
+
 app.get('/info', (request, response) => {
     response.send(`<div><p>Puhelinluettelossa on ${persons.length} henkilön tiedot</p><p>${date}</p></div>`)
 })
