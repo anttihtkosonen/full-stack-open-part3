@@ -5,7 +5,7 @@ const morgan = require('morgan')
 const cors = require('cors')
 const mongoose = require('mongoose')
 const Person = require('./models/person')
-require('dotenv').config()
+
 
 morgan.token('content', function (req, res) { return JSON.stringify(req.body) })
 app.use(morgan(':method :url :content :status :res[content-length] - :response-time ms'))
@@ -91,27 +91,33 @@ app.post('/api/persons', (request, response) => {
         Person
         .find({name: body.name})
         .then(result =>{
-            if(result.lentgh !==0){
+            if(result.length !==0){
                 return response.status(400).json({error: 'Person already exists in database'})
             }
             else{
+                console.log(body.name, body.number)
+
                 const person = new Person ({
                     name: body.name,
                     number: body.number
                 })
-
+                
                 person
                 .save()
-                .then(savedPerson => {
-                    response.json(Person.format(person))    
+                .then(result => {
+                    response.json(Person.format(result))    
                 })
 
                 .catch(error => {
                 console.log(error)
-                response.status(404).end()
+                return response.status(400).json({error: 'Something went wrong with adding person to database'})
                 })                
                 
             }
+        })
+        .catch(error => {
+            console.log(error)
+            return response.status(400).json({error: 'Something went wrong with searching database for name match'})
         })
     }
 })
