@@ -18,61 +18,61 @@ let date = new Date()
 
 app.get('/', (req, res) => {
     res.send('/index.html')
-  })
+})
 
 app.get('/info', (request, response) => {
     Person
-    .countDocuments()
-    .then(amount =>{
-        response.send(`<div><p>Puhelinluettelossa on ${amount} henkilön tiedot</p><p>${date}</p></div>`)
-    })
+        .countDocuments()
+        .then(amount => {
+            response.send(`<div><p>Puhelinluettelossa on ${amount} henkilön tiedot</p><p>${date}</p></div>`)
+        })
 })
-  
+
 
 app.get('/api/persons', (request, response) => {
     console.log('database GET-request sent')
     Person
-    .find({})
-    .then(people => {
-        console.log(people)
-        response.json(people.map(Person.format))
-//        mongoose.connection.close()
+        .find({})
+        .then(people => {
+            console.log(people)
+            response.json(people.map(Person.format))
+            //        mongoose.connection.close()
         })
-    .catch(error => {
-        console.log(error)
-        response.status(404).end().send({ error: 'unable to load phonebook' })
-    })    
-    
+        .catch(error => {
+            console.log(error)
+            response.status(404).end().send({ error: 'unable to load phonebook' })
+        })
+
 })
 
 app.get('/api/persons/:id', (request, response) => {
     console.log(request.params.id)
     Person
-    .findById(request.params.id)
-    .then(person =>{
-        if ( person ) {
-            response.json(Person.format(person))
-        } else {
-            response.status(404).end()
-        }
-    })
-    .catch(error => {
-        console.log(error)
-        response.status(400).send({ error: 'malformatted id' })
-      })
+        .findById(request.params.id)
+        .then(person => {
+            if ( person ) {
+                response.json(Person.format(person))
+            } else {
+                response.status(404).end()
+            }
+        })
+        .catch(error => {
+            console.log(error)
+            response.status(400).send({ error: 'malformatted id' })
+        })
 
 })
 
 app.delete('/api/persons/:id', (request, response) => {
     console.log(request.params.id)
     Person
-    .findByIdAndRemove(request.params.id)
-    .then(result => {
-      response.status(204).end()
-    })
-    .catch(error => {
-      response.status(400).send({ error: 'malformatted id' })
-    })
+        .findByIdAndRemove(request.params.id)
+        .then(result => {
+            response.status(204).end()
+        })
+        .catch(error => {
+            response.status(400).send({ error: 'malformatted id' })
+        })
 })
 
 app.post('/api/persons', (request, response) => {
@@ -80,49 +80,49 @@ app.post('/api/persons', (request, response) => {
     console.log(body)
 
     if (body.name === undefined) {
-        return response.status(400).json({error: 'Name missing'})
+        return response.status(400).json({ error: 'Name missing' })
     }
 
     if (body.number === undefined) {
-        return response.status(400).json({error: 'Number missing'})
+        return response.status(400).json({ error: 'Number missing' })
     }
 
     else{
         Person
-        .find({name: body.name})
-        .then(result =>{
-            if(result.length !==0){
-                return response.status(400).json({error: 'Person already exists in database'})
-            }
-            else{
-                console.log(body.name, body.number)
+            .find({ name: body.name })
+            .then(result => {
+                if(result.length !==0){
+                    return response.status(400).json({ error: 'Person already exists in database' })
+                }
+                else{
+                    console.log(body.name, body.number)
 
-                const person = new Person ({
-                    name: body.name,
-                    number: body.number
-                })
-                
-                person
-                .save()
-                .then(result => {
-                    response.json(Person.format(result))    
-                })
+                    const person = new Person ({
+                        name: body.name,
+                        number: body.number
+                    })
 
-                .catch(error => {
+                    person
+                        .save()
+                        .then(result => {
+                            response.json(Person.format(result))
+                        })
+
+                        .catch(error => {
+                            console.log(error)
+                            return response.status(400).json({ error: 'Something went wrong with adding person to database' })
+                        })
+
+                }
+            })
+            .catch(error => {
                 console.log(error)
-                return response.status(400).json({error: 'Something went wrong with adding person to database'})
-                })                
-                
-            }
-        })
-        .catch(error => {
-            console.log(error)
-            return response.status(400).json({error: 'Something went wrong with searching database for name match'})
-        })
+                return response.status(400).json({ error: 'Something went wrong with searching database for name match' })
+            })
     }
 })
 
-  
+
 app.put('/api/persons/:id', (request, response) => {
     const body = request.body
 
@@ -132,18 +132,18 @@ app.put('/api/persons/:id', (request, response) => {
     }
 
     Person
-    .findOneAndUpdate({_id: request.params.id}, person, { new: true } )
-    .then(updatedPerson =>{
-        response.json(Person.format(person))
-    })
-    .catch(error => {
-        console.log(error)
-        response.status(400).send({ error: 'malformatted id' })
-    })    
+        .findOneAndUpdate({ _id: request.params.id }, person, { new: true } )
+        .then(updatedPerson => {
+            response.json(Person.format(updatedPerson))
+        })
+        .catch(error => {
+            console.log(error)
+            response.status(400).send({ error: 'malformatted id' })
+        })
 })
 
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+    console.log(`Server running on port ${PORT}`)
 })
